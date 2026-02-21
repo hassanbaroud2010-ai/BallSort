@@ -1,329 +1,278 @@
-
-  <!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Color Sort Ultimate Pro</title>
-
-<!-- 🔥 Google AdSense (ضع رقمك بدل XXXXX) -->
-<script async
-src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXX"
-crossorigin="anonymous"></script>
-
+<title>Esports Platform 9.0 Stable</title>
 <style>
 body{
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg,#1e3c72,#2a5298);
-  margin:0;
-  color:white;
-  text-align:center;
-  overflow-x:hidden;
+margin:0;
+font-family:Arial;
+background:#0b1220;
+color:#e2e8f0;
+text-align:center;
+overflow-x:hidden;
 }
-
-#loginScreen{
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:linear-gradient(135deg,#141e30,#243b55);
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  z-index:2000;
-}
-
-#loginScreen input{
-  padding:10px;
-  border-radius:8px;
-  border:none;
-  text-align:center;
-}
-
-#topBar{ padding:10px; }
-
-#game{
-  display:flex;
-  justify-content:center;
-  flex-wrap:wrap;
-  padding:10px;
-}
-
-.tube{
-  width:55px;
-  height:200px;
-  border:3px solid white;
-  border-radius:25px;
-  display:flex;
-  flex-direction:column-reverse;
-  align-items:center;
-  margin:8px;
-  padding:5px;
-  background:rgba(255,255,255,0.05);
-}
-
-.ball{
-  width:40px;height:40px;
-  border-radius:50%;
-  margin:3px 0;
-}
-
-.red{background:#ff4d4d;}
-.blue{background:#4da6ff;}
-.green{background:#4dff88;}
-.yellow{background:#ffd24d;}
-.purple{background:#c77dff;}
-.orange{background:#ff944d;}
-
+h1{color:#38bdf8}
 button{
-  padding:8px 15px;
-  border:none;
-  border-radius:10px;
-  font-weight:bold;
-  margin:5px;
+padding:8px 14px;
+margin:5px;
+border-radius:8px;
+border:1px solid #334155;
+background:#1f2937;
+color:#38bdf8;
+cursor:pointer;
 }
-
-#leaderboard{
-  background:rgba(255,255,255,0.1);
-  margin:10px;
-  padding:10px;
-  border-radius:10px;
+button:hover{background:#38bdf8;color:#000}
+.panel{
+background:#111827;
+padding:15px;
+margin:15px auto;
+max-width:1100px;
+border-radius:12px;
 }
-
-#winScreen{
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:rgba(0,0,0,0.85);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  visibility:hidden;
-  z-index:999;
+canvas{
+background:#020617;
+border:1px solid #334155;
+margin-top:10px;
+display:block;
+margin-left:auto;
+margin-right:auto;
 }
-
-#winBox{
-  background:white;
-  color:black;
-  padding:20px;
-  border-radius:15px;
-  width:85%;
-  max-width:320px;
+.hidden{display:none}
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+td,th{
+border:1px solid #334155;
+padding:6px;
 }
 </style>
 </head>
-
 <body>
 
-<!-- 👤 تسجيل دخول -->
-<div id="loginScreen">
-  <h2>🎮 Welcome</h2>
-  <input id="usernameInput" placeholder="Enter your name">
-  <br><br>
-  <button onclick="login()">Start Game 🚀</button>
+<h1>🏟 Esports Platform 9.0 Stable</h1>
+
+<div id="auth" class="panel">
+<input id="u" placeholder="Username">
+<input id="p" type="password" placeholder="Password">
+<br>
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
 </div>
 
-<div id="topBar">
-  <h2 id="info"></h2>
-  <button onclick="startGame()">Restart 🔄</button>
-  <button onclick="toggleMusic()">🎵 Music</button>
-  <button onclick="logout()">Logout</button>
+<div id="main" class="hidden">
+<div class="panel">
+👤 <span id="userN"></span> |
+🎖 <span id="elo"></span> |
+💰 <span id="credits"></span> |
+🏆 Season: <span id="season"></span>
+<br>
+<button onclick="startArena()">🎥 Arena</button>
+<button onclick="market()">📈 Market</button>
+<button onclick="championship()">🌍 Championship</button>
+<button onclick="logout()">Logout</button>
 </div>
-
-<!-- إعلان علوي -->
-<ins class="adsbygoogle"
-style="display:block"
-data-ad-client="ca-pub-XXXXXXXXXXXX"
-data-ad-slot="1234567890"
-data-ad-format="auto"
-data-full-width-responsive="true"></ins>
-
-<div id="game"></div>
-
-<!-- إعلان سفلي -->
-<ins class="adsbygoogle"
-style="display:block"
-data-ad-client="ca-pub-XXXXXXXXXXXX"
-data-ad-slot="1234567890"
-data-ad-format="auto"
-data-full-width-responsive="true"></ins>
-
-<div id="leaderboard">
-  <h3>🏆 Top Scores</h3>
-  <div id="scores"></div>
-</div>
-
-<!-- شاشة الفوز -->
-<div id="winScreen">
-  <div id="winBox">
-    <h3>🎉 Level Complete!</h3>
-    <p id="winStats"></p>
-    <div id="stars"></div>
-    <button onclick="nextLevel()">Next Level 🚀</button>
-  </div>
+<div id="content" class="panel"></div>
 </div>
 
 <script>
-(adsbygoogle = window.adsbygoogle || []).push({});
-(adsbygoogle = window.adsbygoogle || []).push({});
 
-// 🎵 موسيقى
-const bgMusic=new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3");
-bgMusic.loop=true;
-function toggleMusic(){ bgMusic.paused?bgMusic.play():bgMusic.pause(); }
+/* ================= DATABASE ================= */
 
-// 👤 تسجيل دخول
-let playerName=localStorage.getItem("playerName");
+let db=JSON.parse(localStorage.getItem("esports9stable"))||{
+users:[],
+current:null,
+season:1,
+hall:[]
+};
+
+function save(){
+localStorage.setItem("esports9stable",JSON.stringify(db));
+updateUI();
+}
+
+function currentUser(){
+return db.users.find(x=>x.u===db.current);
+}
+
+/* ================= AUTH ================= */
+
+function register(){
+if(db.users.find(x=>x.u===u.value))return alert("Exists");
+db.users.push({
+u:u.value,
+p:p.value,
+elo:1000,
+credits:1000
+});
+save();
+alert("Registered");
+}
+
 function login(){
-  let name=document.getElementById("usernameInput").value;
-  if(name.trim()!==""){
-    localStorage.setItem("playerName",name);
-    playerName=name;
-    document.getElementById("loginScreen").style.display="none";
-    updateUI();
-  }
-}
-function logout(){ localStorage.clear(); location.reload(); }
-if(playerName){ window.onload=()=>{document.getElementById("loginScreen").style.display="none";}; }
-
-// 🎮 لعبة
-const colors=["red","blue","green","yellow","purple","orange"];
-let currentLevel=localStorage.getItem("level")?parseInt(localStorage.getItem("level")):1;
-let tubes=[],selected=null,moves=0,seconds=0,timer;
-
-const game=document.getElementById("game");
-const winScreen=document.getElementById("winScreen");
-const winStats=document.getElementById("winStats");
-const starsDiv=document.getElementById("stars");
-const scoresDiv=document.getElementById("scores");
-
-function generateLevel(level){
-  let count=Math.min(3+level,colors.length);
-  let chosen=colors.slice(0,count);
-  let balls=[];
-  chosen.forEach(c=>{for(let i=0;i<4;i++)balls.push(c);});
-  balls.sort(()=>Math.random()-0.5);
-  tubes=[];
-  for(let i=0;i<count;i++)tubes.push(balls.splice(0,4));
-  tubes.push([]);tubes.push([]);
+let f=db.users.find(x=>x.u===u.value&&x.p===p.value);
+if(!f)return alert("Invalid");
+db.current=f.u;
+auth.classList.add("hidden");
+main.classList.remove("hidden");
+updateUI();
 }
 
-function startTimer(){
-  clearInterval(timer);
-  seconds=0;
-  timer=setInterval(()=>{seconds++;updateUI();},1000);
+function logout(){
+db.current=null;
+save();
+location.reload();
 }
 
 function updateUI(){
-  document.getElementById("info").innerHTML=
-  `👤 ${playerName||"Guest"} | Level:${currentLevel} | Moves:${moves} | Time:${seconds}s`;
+if(!db.current)return;
+let user=currentUser();
+userN.innerText=user.u;
+elo.innerText="🎖 "+user.elo;
+credits.innerText="💰 "+user.credits;
+season.innerText=db.season;
 }
 
-function render(){
-  game.innerHTML="";
-  tubes.forEach((tube,i)=>{
-    const div=document.createElement("div");
-    div.className="tube";
-    div.onclick=()=>move(i);
-    tube.forEach(color=>{
-      const ball=document.createElement("div");
-      ball.className="ball "+color;
-      div.appendChild(ball);
-    });
-    game.appendChild(div);
-  });
+/* ================= MULTI LAYER AI ================= */
+
+function relu(x){ return Math.max(0,x); }
+function sigmoid(x){ return 1/(1+Math.exp(-x)); }
+
+function multiLayerAI(input){
+let w1=0.8, w2=0.6, w3=0.9;
+let l1=relu(input*w1);
+let l2=relu(l1*w2);
+return sigmoid(l2*w3);
 }
 
-function move(i){
-  if(selected===null){
-    if(tubes[i].length>0)selected=i;
-  }else{
-    if(i!==selected&&tubes[i].length<4){
-      tubes[i].push(tubes[selected].pop());
-      moves++;
-    }
-    selected=null;
-    checkWin();
-    render();
-  }
+/* ================= STABLE CANVAS ARENA ================= */
+
+function startArena(){
+
+content.innerHTML=`
+<h3>🎥 Stable Arena</h3>
+<canvas id="arena" width="500" height="300"></canvas>
+`;
+
+let canvas=document.getElementById("arena");
+let ctx=canvas.getContext("2d");
+
+let playerX=50;
+let aiX=450;
+let speed=2;
+let running=true;
+
+function draw(){
+ctx.clearRect(0,0,500,300);
+
+ctx.fillStyle="#38bdf8";
+ctx.fillRect(playerX,140,20,20);
+
+ctx.fillStyle="red";
+ctx.fillRect(aiX,140,20,20);
 }
 
-function calculateStars(){
-  if(moves<=15)return 3;
-  if(moves<=25)return 2;
-  return 1;
+function update(){
+
+if(!running) return;
+
+let input=Math.random();
+let aiDecision=multiLayerAI(input);
+
+if(aiDecision>0.5) aiX-=speed;
+else aiX+=speed;
+
+playerX+= (Math.random()>0.5?speed:-speed);
+
+playerX=Math.max(0,Math.min(480,playerX));
+aiX=Math.max(0,Math.min(480,aiX));
+
+if(Math.abs(playerX-aiX)<15){
+running=false;
+let user=currentUser();
+if(playerX<aiX){
+user.elo+=100;
+user.credits+=200;
+alert("🏆 Victory");
+}else{
+user.elo-=50;
+alert("❌ Defeat");
+}
+save();
 }
 
-function saveScore(){
-  let scores=JSON.parse(localStorage.getItem("scores")||"[]");
-  scores.push({name:playerName,level:currentLevel,moves});
-  scores.sort((a,b)=>a.moves-b.moves);
-  scores=scores.slice(0,5);
-  localStorage.setItem("scores",JSON.stringify(scores));
-  displayScores();
+draw();
+requestAnimationFrame(update);
 }
 
-function displayScores(){
-  let scores=JSON.parse(localStorage.getItem("scores")||"[]");
-  scoresDiv.innerHTML="";
-  scores.forEach(s=>{
-    scoresDiv.innerHTML+=`${s.name} - L${s.level} - ${s.moves} moves<br>`;
-  });
+update();
 }
 
-function confetti(){
-  for(let i=0;i<60;i++){
-    const d=document.createElement("div");
-    d.style.position="fixed";
-    d.style.width="6px";
-    d.style.height="6px";
-    d.style.background=colors[Math.floor(Math.random()*colors.length)];
-    d.style.left=Math.random()*100+"vw";
-    d.style.top="-10px";
-    document.body.appendChild(d);
-    let fall=setInterval(()=>{
-      d.style.top=parseInt(d.style.top)+5+"px";
-      if(parseInt(d.style.top)>window.innerHeight){
-        clearInterval(fall);d.remove();
-      }
-    },30);
-  }
+/* ================= DYNAMIC MARKET ================= */
+
+let basePrice=100;
+
+function market(){
+
+let supply=Math.random()*50;
+let demand=Math.random()*50;
+
+basePrice+= (demand-supply)*0.5;
+if(basePrice<20) basePrice=20;
+
+content.innerHTML=`
+<h3>📈 Dynamic Market</h3>
+Current Token Price: ${basePrice.toFixed(2)}
+<br>
+<button onclick="buyToken()">Buy Token</button>
+`;
 }
 
-function checkWin(){
-  let win=tubes.every(tube=>
-    tube.length===0||(tube.length===4&&tube.every(c=>c===tube[0]))
-  );
-  if(win){
-    clearInterval(timer);
-    confetti();
-    saveScore();
-    starsDiv.innerHTML="⭐".repeat(calculateStars());
-    winStats.innerHTML=`Moves:${moves}<br>Time:${seconds}s`;
-    winScreen.style.visibility="visible";
-  }
+function buyToken(){
+let user=currentUser();
+if(user.credits<basePrice) return alert("Not enough credits");
+user.credits-=basePrice;
+user.elo+=5;
+save();
+market();
 }
 
-function startGame(){
-  moves=0;
-  generateLevel(currentLevel);
-  startTimer();
-  render();
+/* ================= CHAMPIONSHIP ================= */
+
+function championship(){
+
+let players=[...db.users];
+players.sort((a,b)=>b.elo-a.elo);
+
+let champion=players[0];
+
+db.hall.push({
+season:db.season,
+name:champion.u
+});
+
+db.season++;
+
+db.users.forEach(u=>u.elo=1000);
+
+let html="<h3>🌍 Hall of Fame</h3><table>";
+db.hall.forEach(h=>{
+html+=`<tr><td>Season ${h.season}</td><td>${h.name}</td></tr>`;
+});
+html+="</table>";
+
+content.innerHTML=html;
+save();
 }
 
-function nextLevel(){
-  winScreen.style.visibility="hidden";
-  currentLevel++;
-  localStorage.setItem("level",currentLevel);
-  startGame();
+if(db.current){
+auth.classList.add("hidden");
+main.classList.remove("hidden");
+updateUI();
 }
 
-displayScores();
-generateLevel(currentLevel);
-startTimer();
-render();
 </script>
-
 </body>
-</h!h
+</html>
