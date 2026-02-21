@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Ball Sort Game</title>
+<style>
+body {
+  background:#1e1e2f;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  font-family:Arial;
+}
+.game {
+  display:flex;
+  gap:20px;
+}
+.tube {
+  width:60px;
+  height:200px;
+  border:3px solid white;
+  border-radius:20px;
+  display:flex;
+  flex-direction:column-reverse;
+  align-items:center;
+  padding:5px;
+  cursor:pointer;
+}
+.ball {
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  margin:3px 0;
+}
+.red{background:red;}
+.blue{background:blue;}
+.green{background:green;}
+.yellow{background:yellow;}
+</style>
+</head>
+<body>
+
+<div class="game" id="game"></div>
+
+<script>
+let tubes = [
+  ["red","blue","green","red"],
+  ["blue","green","yellow","yellow"],
+  ["green","red","blue","yellow"],
+  []
+];
+
+let selected = null;
+const game = document.getElementById("game");
+
+function render(){
+  game.innerHTML="";
+  tubes.forEach((tube,i)=>{
+    const div=document.createElement("div");
+    div.className="tube";
+    div.onclick=()=>move(i);
+    tube.forEach(color=>{
+      const ball=document.createElement("div");
+      ball.className="ball "+color;
+      div.appendChild(ball);
+    });
+    game.appendChild(div);
+  });
+}
+
+function move(i){
+  if(selected===null){
+    if(tubes[i].length>0) selected=i;
+  }else{
+    if(i!==selected && tubes[i].length<4){
+      tubes[i].push(tubes[selected].pop());
+    }
+    selected=null;
+    render();
+  }
+}
+
+render();
+</script>
+
+</body>
+</html>
