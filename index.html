@@ -1,58 +1,224 @@
-<!DOCTYPE html>
-<html lang="ar">
+
+  <!DOCTYPE html>
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Ball Sort Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Sort Ultimate Pro</title>
+
+<!-- 🔥 Google AdSense (ضع رقمك بدل XXXXX) -->
+<script async
+src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXX"
+crossorigin="anonymous"></script>
+
 <style>
-body {
-  background:#1e1e2f;
+body{
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#1e3c72,#2a5298);
+  margin:0;
+  color:white;
+  text-align:center;
+  overflow-x:hidden;
+}
+
+#loginScreen{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:linear-gradient(135deg,#141e30,#243b55);
   display:flex;
+  flex-direction:column;
   justify-content:center;
   align-items:center;
-  height:100vh;
-  font-family:Arial;
+  z-index:2000;
 }
-.game {
+
+#loginScreen input{
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  text-align:center;
+}
+
+#topBar{ padding:10px; }
+
+#game{
   display:flex;
-  gap:20px;
+  justify-content:center;
+  flex-wrap:wrap;
+  padding:10px;
 }
-.tube {
-  width:60px;
+
+.tube{
+  width:55px;
   height:200px;
   border:3px solid white;
-  border-radius:20px;
+  border-radius:25px;
   display:flex;
   flex-direction:column-reverse;
   align-items:center;
+  margin:8px;
   padding:5px;
-  cursor:pointer;
+  background:rgba(255,255,255,0.05);
 }
-.ball {
-  width:40px;
-  height:40px;
+
+.ball{
+  width:40px;height:40px;
   border-radius:50%;
   margin:3px 0;
 }
-.red{background:red;}
-.blue{background:blue;}
-.green{background:green;}
-.yellow{background:yellow;}
+
+.red{background:#ff4d4d;}
+.blue{background:#4da6ff;}
+.green{background:#4dff88;}
+.yellow{background:#ffd24d;}
+.purple{background:#c77dff;}
+.orange{background:#ff944d;}
+
+button{
+  padding:8px 15px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  margin:5px;
+}
+
+#leaderboard{
+  background:rgba(255,255,255,0.1);
+  margin:10px;
+  padding:10px;
+  border-radius:10px;
+}
+
+#winScreen{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.85);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  visibility:hidden;
+  z-index:999;
+}
+
+#winBox{
+  background:white;
+  color:black;
+  padding:20px;
+  border-radius:15px;
+  width:85%;
+  max-width:320px;
+}
 </style>
 </head>
+
 <body>
 
-<div class="game" id="game"></div>
+<!-- 👤 تسجيل دخول -->
+<div id="loginScreen">
+  <h2>🎮 Welcome</h2>
+  <input id="usernameInput" placeholder="Enter your name">
+  <br><br>
+  <button onclick="login()">Start Game 🚀</button>
+</div>
+
+<div id="topBar">
+  <h2 id="info"></h2>
+  <button onclick="startGame()">Restart 🔄</button>
+  <button onclick="toggleMusic()">🎵 Music</button>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<!-- إعلان علوي -->
+<ins class="adsbygoogle"
+style="display:block"
+data-ad-client="ca-pub-XXXXXXXXXXXX"
+data-ad-slot="1234567890"
+data-ad-format="auto"
+data-full-width-responsive="true"></ins>
+
+<div id="game"></div>
+
+<!-- إعلان سفلي -->
+<ins class="adsbygoogle"
+style="display:block"
+data-ad-client="ca-pub-XXXXXXXXXXXX"
+data-ad-slot="1234567890"
+data-ad-format="auto"
+data-full-width-responsive="true"></ins>
+
+<div id="leaderboard">
+  <h3>🏆 Top Scores</h3>
+  <div id="scores"></div>
+</div>
+
+<!-- شاشة الفوز -->
+<div id="winScreen">
+  <div id="winBox">
+    <h3>🎉 Level Complete!</h3>
+    <p id="winStats"></p>
+    <div id="stars"></div>
+    <button onclick="nextLevel()">Next Level 🚀</button>
+  </div>
+</div>
 
 <script>
-let tubes = [
-  ["red","blue","green","red"],
-  ["blue","green","yellow","yellow"],
-  ["green","red","blue","yellow"],
-  []
-];
+(adsbygoogle = window.adsbygoogle || []).push({});
+(adsbygoogle = window.adsbygoogle || []).push({});
 
-let selected = null;
-const game = document.getElementById("game");
+// 🎵 موسيقى
+const bgMusic=new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3");
+bgMusic.loop=true;
+function toggleMusic(){ bgMusic.paused?bgMusic.play():bgMusic.pause(); }
+
+// 👤 تسجيل دخول
+let playerName=localStorage.getItem("playerName");
+function login(){
+  let name=document.getElementById("usernameInput").value;
+  if(name.trim()!==""){
+    localStorage.setItem("playerName",name);
+    playerName=name;
+    document.getElementById("loginScreen").style.display="none";
+    updateUI();
+  }
+}
+function logout(){ localStorage.clear(); location.reload(); }
+if(playerName){ window.onload=()=>{document.getElementById("loginScreen").style.display="none";}; }
+
+// 🎮 لعبة
+const colors=["red","blue","green","yellow","purple","orange"];
+let currentLevel=localStorage.getItem("level")?parseInt(localStorage.getItem("level")):1;
+let tubes=[],selected=null,moves=0,seconds=0,timer;
+
+const game=document.getElementById("game");
+const winScreen=document.getElementById("winScreen");
+const winStats=document.getElementById("winStats");
+const starsDiv=document.getElementById("stars");
+const scoresDiv=document.getElementById("scores");
+
+function generateLevel(level){
+  let count=Math.min(3+level,colors.length);
+  let chosen=colors.slice(0,count);
+  let balls=[];
+  chosen.forEach(c=>{for(let i=0;i<4;i++)balls.push(c);});
+  balls.sort(()=>Math.random()-0.5);
+  tubes=[];
+  for(let i=0;i<count;i++)tubes.push(balls.splice(0,4));
+  tubes.push([]);tubes.push([]);
+}
+
+function startTimer(){
+  clearInterval(timer);
+  seconds=0;
+  timer=setInterval(()=>{seconds++;updateUI();},1000);
+}
+
+function updateUI(){
+  document.getElementById("info").innerHTML=
+  `👤 ${playerName||"Guest"} | Level:${currentLevel} | Moves:${moves} | Time:${seconds}s`;
+}
 
 function render(){
   game.innerHTML="";
@@ -71,18 +237,93 @@ function render(){
 
 function move(i){
   if(selected===null){
-    if(tubes[i].length>0) selected=i;
+    if(tubes[i].length>0)selected=i;
   }else{
-    if(i!==selected && tubes[i].length<4){
+    if(i!==selected&&tubes[i].length<4){
       tubes[i].push(tubes[selected].pop());
+      moves++;
     }
     selected=null;
+    checkWin();
     render();
   }
 }
 
+function calculateStars(){
+  if(moves<=15)return 3;
+  if(moves<=25)return 2;
+  return 1;
+}
+
+function saveScore(){
+  let scores=JSON.parse(localStorage.getItem("scores")||"[]");
+  scores.push({name:playerName,level:currentLevel,moves});
+  scores.sort((a,b)=>a.moves-b.moves);
+  scores=scores.slice(0,5);
+  localStorage.setItem("scores",JSON.stringify(scores));
+  displayScores();
+}
+
+function displayScores(){
+  let scores=JSON.parse(localStorage.getItem("scores")||"[]");
+  scoresDiv.innerHTML="";
+  scores.forEach(s=>{
+    scoresDiv.innerHTML+=`${s.name} - L${s.level} - ${s.moves} moves<br>`;
+  });
+}
+
+function confetti(){
+  for(let i=0;i<60;i++){
+    const d=document.createElement("div");
+    d.style.position="fixed";
+    d.style.width="6px";
+    d.style.height="6px";
+    d.style.background=colors[Math.floor(Math.random()*colors.length)];
+    d.style.left=Math.random()*100+"vw";
+    d.style.top="-10px";
+    document.body.appendChild(d);
+    let fall=setInterval(()=>{
+      d.style.top=parseInt(d.style.top)+5+"px";
+      if(parseInt(d.style.top)>window.innerHeight){
+        clearInterval(fall);d.remove();
+      }
+    },30);
+  }
+}
+
+function checkWin(){
+  let win=tubes.every(tube=>
+    tube.length===0||(tube.length===4&&tube.every(c=>c===tube[0]))
+  );
+  if(win){
+    clearInterval(timer);
+    confetti();
+    saveScore();
+    starsDiv.innerHTML="⭐".repeat(calculateStars());
+    winStats.innerHTML=`Moves:${moves}<br>Time:${seconds}s`;
+    winScreen.style.visibility="visible";
+  }
+}
+
+function startGame(){
+  moves=0;
+  generateLevel(currentLevel);
+  startTimer();
+  render();
+}
+
+function nextLevel(){
+  winScreen.style.visibility="hidden";
+  currentLevel++;
+  localStorage.setItem("level",currentLevel);
+  startGame();
+}
+
+displayScores();
+generateLevel(currentLevel);
+startTimer();
 render();
 </script>
 
 </body>
-</html>
+</h!h
