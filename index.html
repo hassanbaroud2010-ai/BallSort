@@ -1,278 +1,165 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Esports Platform 9.0 Stable</title>
+<title>Ball Sort Game</title>
+
 <style>
 body{
-margin:0;
-font-family:Arial;
-background:#0b1220;
-color:#e2e8f0;
-text-align:center;
-overflow-x:hidden;
+    margin:0;
+    background:#0f1220;
+    color:white;
+    font-family:Arial, sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
 }
-h1{color:#38bdf8}
+
+h1{
+    margin:20px;
+}
+
+#game{
+    display:flex;
+    gap:20px;
+    margin-top:20px;
+}
+
+.tube{
+    width:60px;
+    height:200px;
+    background:#1c1f2b;
+    border-radius:10px;
+    padding:10px;
+    display:flex;
+    flex-direction:column-reverse;
+    align-items:center;
+    cursor:pointer;
+}
+
+.ball{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    margin:4px 0;
+}
+
 button{
-padding:8px 14px;
-margin:5px;
-border-radius:8px;
-border:1px solid #334155;
-background:#1f2937;
-color:#38bdf8;
-cursor:pointer;
+    margin-top:20px;
+    padding:8px 16px;
+    background:#1c1f2b;
+    border:1px solid #333;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
 }
-button:hover{background:#38bdf8;color:#000}
-.panel{
-background:#111827;
-padding:15px;
-margin:15px auto;
-max-width:1100px;
-border-radius:12px;
-}
-canvas{
-background:#020617;
-border:1px solid #334155;
-margin-top:10px;
-display:block;
-margin-left:auto;
-margin-right:auto;
-}
-.hidden{display:none}
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:10px;
-}
-td,th{
-border:1px solid #334155;
-padding:6px;
+button:hover{
+    background:#2a2f40;
 }
 </style>
 </head>
+
 <body>
 
-<h1>🏟 Esports Platform 9.0 Stable</h1>
+<h1>Ball Sort</h1>
 
-<div id="auth" class="panel">
-<input id="u" placeholder="Username">
-<input id="p" type="password" placeholder="Password">
-<br>
-<button onclick="register()">Register</button>
-<button onclick="login()">Login</button>
-</div>
+<div id="game"></div>
 
-<div id="main" class="hidden">
-<div class="panel">
-👤 <span id="userN"></span> |
-🎖 <span id="elo"></span> |
-💰 <span id="credits"></span> |
-🏆 Season: <span id="season"></span>
-<br>
-<button onclick="startArena()">🎥 Arena</button>
-<button onclick="market()">📈 Market</button>
-<button onclick="championship()">🌍 Championship</button>
-<button onclick="logout()">Logout</button>
-</div>
-<div id="content" class="panel"></div>
-</div>
+<button onclick="resetGame()">Reset</button>
 
 <script>
 
-/* ================= DATABASE ================= */
+let tubes = [];
+let selectedTube = null;
 
-let db=JSON.parse(localStorage.getItem("esports9stable"))||{
-users:[],
-current:null,
-season:1,
-hall:[]
-};
+const colors = ["red","blue","green","yellow"];
 
-function save(){
-localStorage.setItem("esports9stable",JSON.stringify(db));
-updateUI();
+function initGame(){
+    tubes = [
+        ["red","blue","green","yellow"],
+        ["yellow","green","blue","red"],
+        [],
+        []
+    ];
+    render();
 }
 
-function currentUser(){
-return db.users.find(x=>x.u===db.current);
+function render(){
+    const game = document.getElementById("game");
+    game.innerHTML="";
+
+    tubes.forEach((tube,index)=>{
+        const div=document.createElement("div");
+        div.className="tube";
+        div.onclick=()=>selectTube(index);
+
+        tube.forEach(color=>{
+            const ball=document.createElement("div");
+            ball.className="ball";
+            ball.style.background=color;
+            div.appendChild(ball);
+        });
+
+        game.appendChild(div);
+    });
 }
 
-/* ================= AUTH ================= */
+function selectTube(index){
 
-function register(){
-if(db.users.find(x=>x.u===u.value))return alert("Exists");
-db.users.push({
-u:u.value,
-p:p.value,
-elo:1000,
-credits:1000
-});
-save();
-alert("Registered");
+    if(selectedTube===null){
+        if(tubes[index].length===0) return;
+        selectedTube=index;
+    }else{
+        moveBall(selectedTube,index);
+        selectedTube=null;
+    }
+
 }
 
-function login(){
-let f=db.users.find(x=>x.u===u.value&&x.p===p.value);
-if(!f)return alert("Invalid");
-db.current=f.u;
-auth.classList.add("hidden");
-main.classList.remove("hidden");
-updateUI();
+function moveBall(from,to){
+
+    if(from===to) return;
+
+    if(tubes[from].length===0) return;
+
+    if(tubes[to].length>=4) return;
+
+    const ball = tubes[from][tubes[from].length-1];
+
+    if(tubes[to].length===0 || tubes[to][tubes[to].length-1]===ball){
+        tubes[to].push(tubes[from].pop());
+    }
+
+    render();
+    checkWin();
 }
 
-function logout(){
-db.current=null;
-save();
-location.reload();
+function checkWin(){
+    let win=true;
+
+    tubes.forEach(tube=>{
+        if(tube.length===0) return;
+        if(tube.length!==4) win=false;
+        const first=tube[0];
+        tube.forEach(ball=>{
+            if(ball!==first) win=false;
+        });
+    });
+
+    if(win){
+        setTimeout(()=>{
+            alert("You Win! 🎉");
+        },200);
+    }
 }
 
-function updateUI(){
-if(!db.current)return;
-let user=currentUser();
-userN.innerText=user.u;
-elo.innerText="🎖 "+user.elo;
-credits.innerText="💰 "+user.credits;
-season.innerText=db.season;
+function resetGame(){
+    initGame();
 }
 
-/* ================= MULTI LAYER AI ================= */
-
-function relu(x){ return Math.max(0,x); }
-function sigmoid(x){ return 1/(1+Math.exp(-x)); }
-
-function multiLayerAI(input){
-let w1=0.8, w2=0.6, w3=0.9;
-let l1=relu(input*w1);
-let l2=relu(l1*w2);
-return sigmoid(l2*w3);
-}
-
-/* ================= STABLE CANVAS ARENA ================= */
-
-function startArena(){
-
-content.innerHTML=`
-<h3>🎥 Stable Arena</h3>
-<canvas id="arena" width="500" height="300"></canvas>
-`;
-
-let canvas=document.getElementById("arena");
-let ctx=canvas.getContext("2d");
-
-let playerX=50;
-let aiX=450;
-let speed=2;
-let running=true;
-
-function draw(){
-ctx.clearRect(0,0,500,300);
-
-ctx.fillStyle="#38bdf8";
-ctx.fillRect(playerX,140,20,20);
-
-ctx.fillStyle="red";
-ctx.fillRect(aiX,140,20,20);
-}
-
-function update(){
-
-if(!running) return;
-
-let input=Math.random();
-let aiDecision=multiLayerAI(input);
-
-if(aiDecision>0.5) aiX-=speed;
-else aiX+=speed;
-
-playerX+= (Math.random()>0.5?speed:-speed);
-
-playerX=Math.max(0,Math.min(480,playerX));
-aiX=Math.max(0,Math.min(480,aiX));
-
-if(Math.abs(playerX-aiX)<15){
-running=false;
-let user=currentUser();
-if(playerX<aiX){
-user.elo+=100;
-user.credits+=200;
-alert("🏆 Victory");
-}else{
-user.elo-=50;
-alert("❌ Defeat");
-}
-save();
-}
-
-draw();
-requestAnimationFrame(update);
-}
-
-update();
-}
-
-/* ================= DYNAMIC MARKET ================= */
-
-let basePrice=100;
-
-function market(){
-
-let supply=Math.random()*50;
-let demand=Math.random()*50;
-
-basePrice+= (demand-supply)*0.5;
-if(basePrice<20) basePrice=20;
-
-content.innerHTML=`
-<h3>📈 Dynamic Market</h3>
-Current Token Price: ${basePrice.toFixed(2)}
-<br>
-<button onclick="buyToken()">Buy Token</button>
-`;
-}
-
-function buyToken(){
-let user=currentUser();
-if(user.credits<basePrice) return alert("Not enough credits");
-user.credits-=basePrice;
-user.elo+=5;
-save();
-market();
-}
-
-/* ================= CHAMPIONSHIP ================= */
-
-function championship(){
-
-let players=[...db.users];
-players.sort((a,b)=>b.elo-a.elo);
-
-let champion=players[0];
-
-db.hall.push({
-season:db.season,
-name:champion.u
-});
-
-db.season++;
-
-db.users.forEach(u=>u.elo=1000);
-
-let html="<h3>🌍 Hall of Fame</h3><table>";
-db.hall.forEach(h=>{
-html+=`<tr><td>Season ${h.season}</td><td>${h.name}</td></tr>`;
-});
-html+="</table>";
-
-content.innerHTML=html;
-save();
-}
-
-if(db.current){
-auth.classList.add("hidden");
-main.classList.remove("hidden");
-updateUI();
-}
+initGame();
 
 </script>
+
 </body>
 </html>
