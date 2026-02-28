@@ -3,277 +3,319 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AXIS GOD ENGINE — ULTRA</title>
+<title>AXIS GOD ENGINE — OMEGA</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
 :root{
  --neon:#00f0ff;
- --bg1:#050816;
- --bg2:#0d1428;
+ --bg1:#040612;
+ --bg2:#0b1430;
  --glass:rgba(255,255,255,0.05);
 }
-
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Orbitron',sans-serif;}
-
 body{
- background:linear-gradient(145deg,var(--bg1),var(--bg2));
- color:white;
- text-align:center;
+ background:linear-gradient(135deg,var(--bg1),var(--bg2));
+ color:white;text-align:center;
 }
-
 header{
- padding:20px;
- font-size:28px;
+ padding:20px;font-size:28px;
  color:var(--neon);
- text-shadow:0 0 15px var(--neon);
- animation:glow 2s infinite alternate;
+ text-shadow:0 0 20px var(--neon);
 }
-
-@keyframes glow{
- from{ text-shadow:0 0 10px var(--neon);}
- to{ text-shadow:0 0 25px var(--neon);}
-}
-
 .hud{
- display:flex;
- justify-content:center;
- gap:40px;
+ display:flex;flex-wrap:wrap;
+ justify-content:center;gap:20px;
  padding:15px;
- backdrop-filter:blur(10px);
  background:var(--glass);
+ backdrop-filter:blur(12px);
 }
-
+.card{
+ padding:8px 15px;
+ border:1px solid var(--neon);
+ border-radius:10px;
+}
 .game-container{
  display:flex;
  justify-content:center;
- gap:20px;
- margin-top:50px;
+ gap:15px;
+ margin-top:40px;
  flex-wrap:wrap;
 }
-
 .tube{
- width:90px;
- height:300px;
+ width:80px;height:260px;
  border:2px solid var(--neon);
  border-radius:20px;
  display:flex;
  flex-direction:column-reverse;
  align-items:center;
- padding:10px;
- gap:10px;
+ padding:8px;
+ gap:8px;
  cursor:pointer;
  transition:0.3s;
 }
-
-.tube:hover{
- box-shadow:0 0 20px var(--neon);
-}
-
+.tube:hover{box-shadow:0 0 20px var(--neon);}
 .ball{
- width:60px;
- height:60px;
- border-radius:50%;
- transition:0.3s;
+ width:50px;height:50px;border-radius:50%;
 }
-
-.controls{margin-top:30px;}
-
 button{
- padding:10px 25px;
+ padding:8px 18px;
  margin:5px;
- border:none;
- border-radius:8px;
+ border:none;border-radius:8px;
  background:var(--neon);
- color:black;
- font-weight:bold;
+ color:black;font-weight:bold;
  cursor:pointer;
 }
-
-.shop,.achievements{
- margin-top:50px;
+.section{
+ margin-top:40px;
  padding:20px;
  background:var(--glass);
+ backdrop-filter:blur(8px);
 }
-
-.popup{
- position:fixed;
- top:50%;
- left:50%;
- transform:translate(-50%,-50%);
- background:#111;
- padding:40px;
- border:2px solid var(--neon);
- display:none;
-}
+.hidden{display:none;}
 </style>
 </head>
 <body>
 
-<header>AXIS GOD ENGINE — ULTRA</header>
+<header>AXIS GOD ENGINE — OMEGA</header>
 
 <div class="hud">
- <div>💰 <span id="coins"></span></div>
- <div>⭐ XP: <span id="xp"></span></div>
- <div>🏆 Level: <span id="level"></span></div>
+<div class="card">💰 <span id="coins"></span></div>
+<div class="card">💎 <span id="gems"></span></div>
+<div class="card">⭐ XP: <span id="xp"></span></div>
+<div class="card">🏆 Level: <span id="level"></span></div>
+<div class="card">🔥 Rank: <span id="rank"></span></div>
+<div class="card">⏱ <span id="timer"></span></div>
 </div>
 
 <div class="game-container" id="board"></div>
 
-<div class="controls">
- <button onclick="newGame()">لعبة جديدة</button>
+<div>
+<button onclick="newGame()">New</button>
+<button onclick="undoMove()">Undo</button>
+<button onclick="giveHint()">Hint</button>
 </div>
 
-<div class="shop">
- <h2>المتجر</h2>
- <button onclick="buySkin('#ff00ff',300)">Neon Pink (300)</button>
- <button onclick="buySkin('#00ff88',400)">Cyber Green (400)</button>
+<div class="section">
+<h2>🎁 Daily Reward</h2>
+<button onclick="dailyReward()">Claim</button>
 </div>
 
-<div class="achievements">
- <h2>الإنجازات</h2>
- <div id="achList"></div>
+<div class="section">
+<h2>🏅 Achievements</h2>
+<div id="achievements"></div>
 </div>
 
-<div class="popup" id="winPopup">
- <h2>🎉 فزت!</h2>
- <button onclick="closePopup()">إغلاق</button>
+<div class="section">
+<h2>📊 Leaderboard</h2>
+<div id="leaderboard"></div>
+</div>
+
+<div class="section">
+<h2>👥 Clan</h2>
+<input id="clanName" placeholder="Clan Name">
+<button onclick="createClan()">Create</button>
+<div id="clanInfo"></div>
 </div>
 
 <script>
-
-let state = JSON.parse(localStorage.getItem("axisSave")) || {
- coins:200,
- xp:0,
- level:1,
- wins:0,
- skin:"#00f0ff",
- achievements:{first:false,five:false,ten:false}
+let save=JSON.parse(localStorage.getItem("omegaSave"))||{
+coins:500,gems:50,xp:0,level:1,wins:0,
+rank:"Bronze",
+ach:{},
+clan:null,
+season:1,
+lastDaily:0
 };
 
-let tubesData = [];
-let selectedTube=null;
+let tubes=[];
+let selected=null;
+let history=[];
+let timer=60;
+let timerInterval;
 
-function save(){ localStorage.setItem("axisSave",JSON.stringify(state)); }
-
-function updateHUD(){
- document.getElementById("coins").innerText=state.coins;
- document.getElementById("xp").innerText=state.xp;
- document.getElementById("level").innerText=state.level;
- document.documentElement.style.setProperty('--neon',state.skin);
+function saveGame(){
+localStorage.setItem("omegaSave",JSON.stringify(save));
 }
 
-function generateLevel(){
- let colors=["red","blue","green","yellow","purple"];
- let difficulty=state.level+2;
- tubesData=[];
- for(let i=0;i<difficulty;i++){
-  let arr=[];
-  for(let j=0;j<4;j++){
-   arr.push(colors[Math.floor(Math.random()*difficulty%colors.length)]);
-  }
-  tubesData.push(arr);
- }
- tubesData.push([]);
+function updateHUD(){
+coins.innerText=save.coins;
+gems.innerText=save.gems;
+xp.innerText=save.xp;
+level.innerText=save.level;
+rank.innerText=save.rank;
+timer.innerText=timer+"s";
+}
+
+function generate(){
+let colors=["red","blue","green","yellow","purple"];
+tubes=[];
+for(let i=0;i<save.level+3;i++){
+let arr=[];
+for(let j=0;j<4;j++){
+arr.push(colors[Math.floor(Math.random()*colors.length)]);
+}
+tubes.push(arr);
+}
+tubes.push([]);
 }
 
 function render(){
- const board=document.getElementById("board");
- board.innerHTML="";
- tubesData.forEach((tube,i)=>{
-  let div=document.createElement("div");
-  div.className="tube";
-  div.onclick=()=>selectTube(i);
-  tube.forEach(color=>{
-   let ball=document.createElement("div");
-   ball.className="ball";
-   ball.style.background=color;
-   div.appendChild(ball);
-  });
-  board.appendChild(div);
- });
+board.innerHTML="";
+tubes.forEach((tube,i)=>{
+let div=document.createElement("div");
+div.className="tube";
+div.onclick=()=>selectTube(i);
+tube.forEach(color=>{
+let ball=document.createElement("div");
+ball.className="ball";
+ball.style.background=color;
+div.appendChild(ball);
+});
+board.appendChild(div);
+});
 }
 
 function selectTube(i){
- if(selectedTube===null){selectedTube=i;}
- else{
-  moveBall(selectedTube,i);
-  selectedTube=null;
- }
+if(selected===null){selected=i;}
+else{
+move(selected,i);
+selected=null;
+}
 }
 
-function moveBall(from,to){
- if(tubesData[from].length===0) return;
- let ball=tubesData[from].pop();
- tubesData[to].push(ball);
- render();
- checkWin();
+function move(a,b){
+if(tubes[a].length===0) return;
+history.push(JSON.stringify(tubes));
+let ball=tubes[a].pop();
+tubes[b].push(ball);
+render();
+checkWin();
+}
+
+function undoMove(){
+if(history.length>0){
+tubes=JSON.parse(history.pop());
+render();
+}
 }
 
 function checkWin(){
- let win=true;
- tubesData.forEach(tube=>{
-  if(tube.length>0){
-   if(!tube.every(c=>c===tube[0])) win=false;
-  }
- });
- if(win){
-  state.wins++;
-  state.coins+=100;
-  state.xp+=50;
-  if(state.xp>=200){
-   state.level++;
-   state.xp=0;
-  }
-  unlockAchievements();
-  save();
-  updateHUD();
-  document.getElementById("winPopup").style.display="block";
- }
+let win=true;
+tubes.forEach(t=>{
+if(t.length>0 && !t.every(c=>c===t[0])) win=false;
+});
+if(win){
+save.wins++;
+save.coins+=200;
+save.gems+=5;
+save.xp+=100;
+if(save.xp>=300){
+save.level++;
+save.xp=0;
+}
+updateRank();
+unlockAchievements();
+saveGame();
+alert("🔥 Victory!");
+newGame();
+}
+}
+
+function updateRank(){
+if(save.level>20) save.rank="GOD";
+else if(save.level>10) save.rank="Master";
+else if(save.level>5) save.rank="Silver";
+else save.rank="Bronze";
 }
 
 function unlockAchievements(){
- if(state.wins>=1) state.achievements.first=true;
- if(state.wins>=5) state.achievements.five=true;
- if(state.wins>=10) state.achievements.ten=true;
- renderAchievements();
+if(save.wins>=1) save.ach.first=true;
+if(save.wins>=5) save.ach.five=true;
+if(save.wins>=10) save.ach.ten=true;
+renderAchievements();
 }
 
 function renderAchievements(){
- let el=document.getElementById("achList");
- el.innerHTML="";
- for(let key in state.achievements){
-  if(state.achievements[key]){
-   let div=document.createElement("div");
-   div.innerText="✔ "+key;
-   el.appendChild(div);
-  }
- }
+achievements.innerHTML="";
+for(let key in save.ach){
+if(save.ach[key]){
+let div=document.createElement("div");
+div.innerText="✔ "+key;
+achievements.appendChild(div);
+}
+}
 }
 
-function buySkin(color,price){
- if(state.coins>=price){
-  state.coins-=price;
-  state.skin=color;
-  save();
-  updateHUD();
- }
+function dailyReward(){
+let now=Date.now();
+if(now-save.lastDaily>86400000){
+save.coins+=500;
+save.gems+=20;
+save.lastDaily=now;
+saveGame();
+updateHUD();
+}
+}
+
+function createClan(){
+let name=document.getElementById("clanName").value;
+if(name){
+save.clan={name:name,points:0};
+saveGame();
+renderClan();
+}
+}
+
+function renderClan(){
+if(save.clan){
+clanInfo.innerText="Clan: "+save.clan.name+" | Points: "+save.clan.points;
+}
+}
+
+function startTimer(){
+clearInterval(timerInterval);
+timer=60;
+timerInterval=setInterval(()=>{
+timer--;
+updateHUD();
+if(timer<=0){
+clearInterval(timerInterval);
+alert("Time Up!");
+newGame();
+}
+},1000);
+}
+
+function giveHint(){
+alert("Hint: حاول تجميع الألوان المتشابهة أولاً.");
+}
+
+function updateLeaderboard(){
+let lb=JSON.parse(localStorage.getItem("omegaLB"))||[];
+lb.push({score:save.wins,date:Date.now()});
+lb.sort((a,b)=>b.score-a.score);
+lb=lb.slice(0,10);
+localStorage.setItem("omegaLB",JSON.stringify(lb));
+leaderboard.innerHTML="";
+lb.forEach((p,i)=>{
+let div=document.createElement("div");
+div.innerText=(i+1)+". Wins: "+p.score;
+leaderboard.appendChild(div);
+});
 }
 
 function newGame(){
- generateLevel();
- render();
-}
-
-function closePopup(){
- document.getElementById("winPopup").style.display="none";
- newGame();
+generate();
+render();
+startTimer();
+updateLeaderboard();
+updateHUD();
+renderClan();
+renderAchievements();
 }
 
 updateHUD();
-renderAchievements();
 newGame();
-
 </script>
 </body>
 </html>
