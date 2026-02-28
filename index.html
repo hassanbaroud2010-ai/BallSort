@@ -3,305 +3,264 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AXIS GOD ENGINE - MEGA</title>
+<title>AXIS GOD ENGINE — PRO</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-body{
+
+:root{
+    --neon:#00f0ff;
+    --bg1:#050816;
+    --bg2:#0d1428;
+    --glass:rgba(255,255,255,0.05);
+}
+
+*{
     margin:0;
-    font-family:Arial;
-    background:linear-gradient(135deg,#0f0f1a,#0b1026);
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Orbitron',sans-serif;
+}
+
+body{
+    background:linear-gradient(145deg,var(--bg1),var(--bg2));
     color:white;
+    overflow-x:hidden;
+}
+
+/* ===== Header ===== */
+
+header{
+    padding:20px;
     text-align:center;
-}
-h1{ text-shadow:0 0 20px #00ffff; }
-
-#topbar{
-    display:flex;
-    justify-content:space-around;
-    padding:10px;
-    background:#111827;
-    box-shadow:0 0 20px #00ffff44;
+    font-size:28px;
+    letter-spacing:3px;
+    color:var(--neon);
+    text-shadow:0 0 15px var(--neon);
+    animation: glow 2s infinite alternate;
 }
 
-#board{
+@keyframes glow{
+    from{ text-shadow:0 0 10px var(--neon);}
+    to{ text-shadow:0 0 25px var(--neon);}
+}
+
+/* ===== HUD ===== */
+
+.hud{
     display:flex;
     justify-content:center;
+    gap:40px;
+    padding:15px;
+    backdrop-filter:blur(10px);
+    background:var(--glass);
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.hud span{
+    font-size:14px;
+    color:#ccc;
+}
+
+.hud strong{
+    color:var(--neon);
+}
+
+/* ===== Game Board ===== */
+
+.game-container{
+    display:flex;
+    justify-content:center;
+    gap:25px;
+    margin-top:60px;
     flex-wrap:wrap;
-    gap:20px;
-    margin:20px;
 }
 
 .tube{
-    width:80px;
-    height:220px;
-    border:3px solid #00ffff;
+    width:90px;
+    height:300px;
+    border:2px solid var(--neon);
     border-radius:20px;
     display:flex;
     flex-direction:column-reverse;
-    padding:5px;
+    align-items:center;
+    padding:10px;
+    gap:10px;
     cursor:pointer;
-    transition:0.2s;
+    transition:0.3s;
+    background:rgba(0,0,0,0.4);
 }
-.tube.selected{ box-shadow:0 0 25px #ff00ff; }
+
+.tube:hover{
+    box-shadow:0 0 20px var(--neon);
+    transform:translateY(-5px);
+}
 
 .ball{
-    width:55px;
-    height:55px;
+    width:60px;
+    height:60px;
     border-radius:50%;
-    margin:3px auto;
+    animation:pop 0.3s ease;
+}
+
+@keyframes pop{
+    from{ transform:scale(0);}
+    to{ transform:scale(1);}
+}
+
+/* ===== Buttons ===== */
+
+.controls{
+    text-align:center;
+    margin-top:40px;
 }
 
 button{
-    padding:8px 15px;
+    padding:10px 25px;
+    margin:5px;
     border:none;
     border-radius:8px;
-    background:#00ffff;
-    cursor:pointer;
+    background:var(--neon);
+    color:black;
     font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
 }
-button:hover{ background:#ff00ff; color:white; }
 
-.panel{
-    background:#111827;
-    padding:10px;
-    margin:10px;
-    border-radius:10px;
-    box-shadow:0 0 10px #00ffff33;
+button:hover{
+    transform:scale(1.1);
+    box-shadow:0 0 15px var(--neon);
 }
+
+/* ===== Shop Panel ===== */
+
+.shop{
+    margin-top:60px;
+    padding:30px;
+    text-align:center;
+    backdrop-filter:blur(12px);
+    background:var(--glass);
+    border-top:1px solid rgba(255,255,255,0.1);
+}
+
+.skin{
+    display:inline-block;
+    margin:10px;
+    padding:10px 20px;
+    border:1px solid var(--neon);
+    border-radius:10px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.skin:hover{
+    background:var(--neon);
+    color:black;
+}
+
+/* ===== Responsive ===== */
+
+@media(max-width:768px){
+    .tube{
+        width:70px;
+        height:240px;
+    }
+    .ball{
+        width:45px;
+        height:45px;
+    }
+}
+
 </style>
 </head>
 <body>
 
-<h1>AXIS GOD ENGINE</h1>
+<header>AXIS GOD ENGINE</header>
 
-<div id="topbar">
-<div>💰 <span id="coins">0</span></div>
-<div>⭐ XP: <span id="xp">0</span></div>
-<div>🏆 Level: <span id="level">1</span></div>
-<div>🔥 Combo: <span id="combo">0</span></div>
-<div>⏱️ <span id="timer">0</span>s</div>
+<div class="hud">
+    <span>💰 Coins: <strong id="coins">200</strong></span>
+    <span>⭐ XP: <strong id="xp">450</strong></span>
+    <span>🏆 Level: <strong id="level">6</strong></span>
 </div>
 
-<div id="board"></div>
+<div class="game-container" id="board"></div>
 
-<div>
-<button onclick="restart()">إعادة</button>
-<button onclick="openShop()">المتجر</button>
-<button onclick="showAchievements()">الإنجازات</button>
+<div class="controls">
+    <button onclick="resetGame()">إعادة</button>
 </div>
 
-<div id="panelArea"></div>
+<div class="shop">
+    <h2>المتجر</h2>
+    <div class="skin" onclick="buySkin()">شراء Neon Skin (200)</div>
+</div>
 
 <script>
-/* ===============================
-   DATA SYSTEM
-=================================*/
-let capacity = 4;
-let tubes = [];
-let selected = null;
-let startTime;
-let timerInterval;
-let combo = 0;
 
-let gameData = JSON.parse(localStorage.getItem("axisData")) || {
-    coins: 0,
-    xp: 0,
-    level: 1,
-    skins: ["classic"],
-    activeSkin: "classic",
-    achievements: {},
-    season: 1,
-    wins: 0,
-    clan: "None",
-    ranking: 0
-};
+let coins = 200;
+let colors = ["red","yellow","blue","green"];
+let tubesData = [
+    ["green","red","blue","green"],
+    ["yellow","green","red","yellow"],
+    ["blue","red","yellow","blue"],
+    []
+];
 
-/* ===============================
-   LEVEL SYSTEM
-=================================*/
-function generateLevel(){
-    let colors = ["red","blue","green","yellow","purple","orange"];
-    let level = gameData.level;
-    let used = colors.slice(0,Math.min(3+Math.floor(level/3),6));
-    let arr=[];
-    used.forEach(c=>{
-        for(let i=0;i<capacity;i++) arr.push(c);
-    });
-    arr.sort(()=>Math.random()-0.5);
+let selectedTube = null;
 
-    let result=[];
-    let tubeCount = used.length+2;
-    for(let i=0;i<tubeCount;i++) result.push([]);
-
-    let index=0;
-    for(let i=0;i<used.length;i++){
-        for(let j=0;j<capacity;j++){
-            result[i].push(arr[index++]);
-        }
-    }
-    return result;
-}
-
-/* ===============================
-   START
-=================================*/
-function startGame(){
-    tubes = generateLevel();
-    startTime = Date.now();
-    timerInterval = setInterval(updateTimer,1000);
-    render();
-    updateUI();
-}
-
-/* ===============================
-   GAMEPLAY
-=================================*/
 function render(){
-    const board=document.getElementById("board");
-    board.innerHTML="";
-    tubes.forEach((tube,i)=>{
-        const div=document.createElement("div");
-        div.className="tube";
-        if(selected===i) div.classList.add("selected");
-        div.onclick=()=>selectTube(i);
+    const board = document.getElementById("board");
+    board.innerHTML = "";
+
+    tubesData.forEach((tube,index)=>{
+        const tubeDiv = document.createElement("div");
+        tubeDiv.className = "tube";
+        tubeDiv.onclick = ()=>selectTube(index);
+
         tube.forEach(color=>{
-            const ball=document.createElement("div");
+            const ball = document.createElement("div");
             ball.className="ball";
             ball.style.background=color;
-            if(gameData.activeSkin==="neon"){
-                ball.style.boxShadow="0 0 20px "+color;
-            }
-            div.appendChild(ball);
+            tubeDiv.appendChild(ball);
         });
-        board.appendChild(div);
+
+        board.appendChild(tubeDiv);
     });
 }
 
-function selectTube(i){
-    if(selected===null){
-        if(tubes[i].length===0) return;
-        selected=i;
+function selectTube(index){
+    if(selectedTube === null){
+        selectedTube = index;
     }else{
-        move(selected,i);
-        selected=null;
+        moveBall(selectedTube,index);
+        selectedTube = null;
     }
+}
+
+function moveBall(from,to){
+    if(tubesData[from].length === 0) return;
+    let ball = tubesData[from].pop();
+    tubesData[to].push(ball);
     render();
 }
 
-function move(from,to){
-    if(from===to) return;
-    if(tubes[from].length===0) return;
-    if(tubes[to].length>=capacity) return;
-
-    let ball=tubes[from][tubes[from].length-1];
-    if(tubes[to].length===0 || tubes[to][tubes[to].length-1]===ball){
-        tubes[to].push(tubes[from].pop());
-        combo++;
-        gameData.xp+=5;
-        updateUI();
-        checkWin();
-    } else {
-        combo=0;
-    }
-}
-
-function checkWin(){
-    let win=true;
-    for(let t of tubes){
-        if(t.length===0) continue;
-        if(t.length!==capacity) win=false;
-        if(!t.every(c=>c===t[0])) win=false;
-    }
-    if(win){
-        clearInterval(timerInterval);
-        rewardPlayer();
-    }
-}
-
-/* ===============================
-   REWARD + LEVEL UP
-=================================*/
-function rewardPlayer(){
-    let reward=50+combo*10;
-    gameData.coins+=reward;
-    gameData.wins++;
-    gameData.xp+=100;
-
-    if(gameData.xp>=gameData.level*200){
-        gameData.xp=0;
-        gameData.level++;
-    }
-
-    unlockAchievements();
-    save();
-    alert("فزت! +" + reward + " Coins");
-    startGame();
-}
-
-/* ===============================
-   ACHIEVEMENTS
-=================================*/
-function unlockAchievements(){
-    if(gameData.wins>=1) gameData.achievements["First Win"]=true;
-    if(gameData.wins>=10) gameData.achievements["Pro Player"]=true;
-}
-
-function showAchievements(){
-    let html="<div class='panel'><h3>الإنجازات</h3>";
-    for(let key in gameData.achievements){
-        html+="<div>🏆 "+key+"</div>";
-    }
-    html+="</div>";
-    document.getElementById("panelArea").innerHTML=html;
-}
-
-/* ===============================
-   SHOP
-=================================*/
-function openShop(){
-    let html="<div class='panel'><h3>المتجر</h3>";
-    html+="<button onclick='buySkin()'>شراء Neon Skin (200)</button>";
-    html+="</div>";
-    document.getElementById("panelArea").innerHTML=html;
+function resetGame(){
+    location.reload();
 }
 
 function buySkin(){
-    if(gameData.coins>=200){
-        gameData.coins-=200;
-        gameData.skins.push("neon");
-        gameData.activeSkin="neon";
-        save();
-        render();
-        updateUI();
-    } else {
-        alert("لا يوجد Coins كافية");
+    if(coins>=200){
+        coins-=200;
+        document.getElementById("coins").innerText=coins;
+        document.documentElement.style.setProperty('--neon','#ff00ff');
+        alert("تم شراء السكن بنجاح!");
+    }else{
+        alert("لا يوجد رصيد كافي");
     }
 }
 
-/* ===============================
-   UTIL
-=================================*/
-function updateTimer(){
-    let sec=Math.floor((Date.now()-startTime)/1000);
-    document.getElementById("timer").innerText=sec;
-}
+render();
 
-function updateUI(){
-    document.getElementById("coins").innerText=gameData.coins;
-    document.getElementById("xp").innerText=gameData.xp;
-    document.getElementById("level").innerText=gameData.level;
-    document.getElementById("combo").innerText=combo;
-}
-
-function save(){
-    localStorage.setItem("axisData",JSON.stringify(gameData));
-}
-
-function restart(){
-    startGame();
-}
-
-startGame();
 </script>
 
 </body>
