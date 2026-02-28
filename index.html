@@ -3,80 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AXIS GOD ENGINE — OMEGA</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<title>AXIS GOD ENGINE - ULTRA STORE EDITION</title>
+
 <style>
 :root{
- --neon:#00f0ff;
- --bg1:#040612;
- --bg2:#0b1430;
- --glass:rgba(255,255,255,0.05);
+--bg1:#050816;
+--bg2:#0e1635;
+--neon:#00f0ff;
+--glass:rgba(255,255,255,0.05);
 }
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
 body{
- background:linear-gradient(135deg,var(--bg1),var(--bg2));
- color:white;text-align:center;
+background:linear-gradient(135deg,var(--bg1),var(--bg2));
+color:white;text-align:center
 }
 header{
- padding:20px;font-size:28px;
- color:var(--neon);
- text-shadow:0 0 20px var(--neon);
+padding:20px;font-size:26px;color:var(--neon);
+text-shadow:0 0 20px var(--neon)
 }
-.hud{
- display:flex;flex-wrap:wrap;
- justify-content:center;gap:20px;
- padding:15px;
- background:var(--glass);
- backdrop-filter:blur(12px);
-}
-.card{
- padding:8px 15px;
- border:1px solid var(--neon);
- border-radius:10px;
-}
-.game-container{
- display:flex;
- justify-content:center;
- gap:15px;
- margin-top:40px;
- flex-wrap:wrap;
-}
-.tube{
- width:80px;height:260px;
- border:2px solid var(--neon);
- border-radius:20px;
- display:flex;
- flex-direction:column-reverse;
- align-items:center;
- padding:8px;
- gap:8px;
- cursor:pointer;
- transition:0.3s;
-}
-.tube:hover{box-shadow:0 0 20px var(--neon);}
-.ball{
- width:50px;height:50px;border-radius:50%;
-}
+.hud{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:10px}
+.card{padding:6px 12px;border:1px solid var(--neon);border-radius:8px}
 button{
- padding:8px 18px;
- margin:5px;
- border:none;border-radius:8px;
- background:var(--neon);
- color:black;font-weight:bold;
- cursor:pointer;
+padding:6px 12px;margin:4px;border:none;border-radius:6px;
+background:var(--neon);color:black;font-weight:bold;cursor:pointer
 }
-.section{
- margin-top:40px;
- padding:20px;
- background:var(--glass);
- backdrop-filter:blur(8px);
+.game{display:flex;justify-content:center;gap:15px;margin-top:30px;flex-wrap:wrap}
+.tube{
+width:70px;height:240px;border:2px solid var(--neon);
+border-radius:20px;display:flex;flex-direction:column-reverse;
+align-items:center;padding:8px;gap:6px;cursor:pointer
 }
-.hidden{display:none;}
+.ball{width:45px;height:45px;border-radius:50%}
+.section{margin-top:25px;padding:15px;background:var(--glass)}
+.store-item{margin:6px}
 </style>
 </head>
 <body>
 
-<header>AXIS GOD ENGINE — OMEGA</header>
+<header>AXIS GOD ENGINE — ULTRA STORE</header>
 
 <div class="hud">
 <div class="card">💰 <span id="coins"></span></div>
@@ -84,72 +48,80 @@ button{
 <div class="card">⭐ XP: <span id="xp"></span></div>
 <div class="card">🏆 Level: <span id="level"></span></div>
 <div class="card">🔥 Rank: <span id="rank"></span></div>
-<div class="card">⏱ <span id="timer"></span></div>
 </div>
-
-<div class="game-container" id="board"></div>
 
 <div>
 <button onclick="newGame()">New</button>
-<button onclick="undoMove()">Undo</button>
-<button onclick="giveHint()">Hint</button>
+<button onclick="undo()">Undo</button>
+<button onclick="hint()">Hint</button>
 </div>
 
-<div class="section">
-<h2>🎁 Daily Reward</h2>
-<button onclick="dailyReward()">Claim</button>
-</div>
+<div class="game" id="board"></div>
 
 <div class="section">
-<h2>🏅 Achievements</h2>
-<div id="achievements"></div>
-</div>
+<h2>🏪 STORE</h2>
 
-<div class="section">
-<h2>📊 Leaderboard</h2>
-<div id="leaderboard"></div>
-</div>
+<h3>🎨 Skins</h3>
+<div id="skinsStore"></div>
 
-<div class="section">
-<h2>👥 Clan</h2>
-<input id="clanName" placeholder="Clan Name">
-<button onclick="createClan()">Create</button>
-<div id="clanInfo"></div>
+<h3>✨ Effects</h3>
+<div id="effectsStore"></div>
+
+<h3>🚀 Boosters</h3>
+<div id="boostersStore"></div>
+
 </div>
 
 <script>
-let save=JSON.parse(localStorage.getItem("omegaSave"))||{
-coins:500,gems:50,xp:0,level:1,wins:0,
+
+// ================= SAVE =================
+
+let save = JSON.parse(localStorage.getItem("axisSave")) || {
+coins:2000,
+gems:200,
+xp:0,
+level:1,
 rank:"Bronze",
-ach:{},
-clan:null,
-season:1,
-lastDaily:0
+wins:0,
+inventory:{skins:{},effects:{},boosters:{}},
+equipped:{skin:null,effect:null},
+boostersActive:{xp2:0,coins2:0}
 };
+
+function saveData(){
+localStorage.setItem("axisSave",JSON.stringify(save));
+}
+
+// ================= STORE DATA =================
+
+const STORE = {
+skins:[
+{id:"neon",name:"Neon Glow",price:500,type:"coins"},
+{id:"gold",name:"Gold",price:1000,type:"coins"},
+{id:"shadow",name:"Shadow",price:150,type:"gems"},
+{id:"rainbow",name:"Rainbow",price:300,type:"gems"}
+],
+effects:[
+{id:"fire",name:"Fire",price:800,type:"coins"},
+{id:"lightning",name:"Lightning",price:200,type:"gems"},
+{id:"pulse",name:"Pulse",price:1200,type:"coins"}
+],
+boosters:[
+{id:"xp2",name:"Double XP (5)",price:400,type:"coins"},
+{id:"coins2",name:"Double Coins (5)",price:600,type:"coins"}
+]
+};
+
+// ================= GAME =================
 
 let tubes=[];
 let selected=null;
 let history=[];
-let timer=60;
-let timerInterval;
-
-function saveGame(){
-localStorage.setItem("omegaSave",JSON.stringify(save));
-}
-
-function updateHUD(){
-coins.innerText=save.coins;
-gems.innerText=save.gems;
-xp.innerText=save.xp;
-level.innerText=save.level;
-rank.innerText=save.rank;
-timer.innerText=timer+"s";
-}
 
 function generate(){
 let colors=["red","blue","green","yellow","purple"];
 tubes=[];
-for(let i=0;i<save.level+3;i++){
+for(let i=0;i<save.level+2;i++){
 let arr=[];
 for(let j=0;j<4;j++){
 arr.push(colors[Math.floor(Math.random()*colors.length)]);
@@ -165,34 +137,63 @@ tubes.forEach((tube,i)=>{
 let div=document.createElement("div");
 div.className="tube";
 div.onclick=()=>selectTube(i);
-tube.forEach(color=>{
+
+tube.forEach(c=>{
 let ball=document.createElement("div");
 ball.className="ball";
-ball.style.background=color;
+ball.style.background=c;
+
+// SKINS
+if(save.equipped.skin==="neon")
+ball.style.boxShadow="0 0 15px "+c;
+
+if(save.equipped.skin==="gold")
+ball.style.background="gold";
+
+if(save.equipped.skin==="shadow")
+ball.style.background="black";
+
+if(save.equipped.skin==="rainbow")
+ball.style.background="linear-gradient(45deg,red,blue,green,yellow)";
+
+// EFFECTS
+if(save.equipped.effect==="fire")
+ball.style.boxShadow="0 0 20px orange";
+
+if(save.equipped.effect==="lightning")
+ball.style.boxShadow="0 0 20px cyan";
+
+if(save.equipped.effect==="pulse"){
+ball.animate([
+{transform:"scale(1)"},
+{transform:"scale(1.2)"},
+{transform:"scale(1)"}
+],{duration:1000,iterations:Infinity});
+}
+
 div.appendChild(ball);
 });
+
 board.appendChild(div);
 });
 }
 
 function selectTube(i){
-if(selected===null){selected=i;}
-else{
-move(selected,i);
-selected=null;
-}
+if(selected===null){selected=i}
+else{move(selected,i);selected=null}
 }
 
 function move(a,b){
 if(tubes[a].length===0) return;
+let top=tubes[a][tubes[a].length-1];
+if(tubes[b].length>0 && tubes[b][tubes[b].length-1]!==top) return;
 history.push(JSON.stringify(tubes));
-let ball=tubes[a].pop();
-tubes[b].push(ball);
+tubes[b].push(tubes[a].pop());
 render();
 checkWin();
 }
 
-function undoMove(){
+function undo(){
 if(history.length>0){
 tubes=JSON.parse(history.pop());
 render();
@@ -206,17 +207,31 @@ if(t.length>0 && !t.every(c=>c===t[0])) win=false;
 });
 if(win){
 save.wins++;
-save.coins+=200;
-save.gems+=5;
-save.xp+=100;
+
+let xpGain=100;
+let coinGain=200;
+
+if(save.boostersActive.xp2>0){
+xpGain*=2;
+save.boostersActive.xp2--;
+}
+
+if(save.boostersActive.coins2>0){
+coinGain*=2;
+save.boostersActive.coins2--;
+}
+
+save.xp+=xpGain;
+save.coins+=coinGain;
+
 if(save.xp>=300){
 save.level++;
 save.xp=0;
 }
+
 updateRank();
-unlockAchievements();
-saveGame();
-alert("🔥 Victory!");
+saveData();
+updateHUD();
 newGame();
 }
 }
@@ -228,94 +243,89 @@ else if(save.level>5) save.rank="Silver";
 else save.rank="Bronze";
 }
 
-function unlockAchievements(){
-if(save.wins>=1) save.ach.first=true;
-if(save.wins>=5) save.ach.five=true;
-if(save.wins>=10) save.ach.ten=true;
-renderAchievements();
+function hint(){
+alert("جمع نفس اللون معًا 👑");
 }
 
-function renderAchievements(){
-achievements.innerHTML="";
-for(let key in save.ach){
-if(save.ach[key]){
+// ================= STORE SYSTEM =================
+
+function renderStore(){
+renderCategory(STORE.skins,"skinsStore","skins");
+renderCategory(STORE.effects,"effectsStore","effects");
+renderCategory(STORE.boosters,"boostersStore","boosters");
+}
+
+function renderCategory(items,elementId,category){
+const container=document.getElementById(elementId);
+container.innerHTML="";
+
+items.forEach(item=>{
+let owned=save.inventory[category][item.id];
 let div=document.createElement("div");
-div.innerText="✔ "+key;
-achievements.appendChild(div);
-}
-}
+div.className="store-item";
+
+let btn=document.createElement("button");
+
+if(owned){
+btn.innerText="Equip";
+btn.onclick=()=>equipItem(category,item.id);
+}else{
+btn.innerText=`Buy (${item.price} ${item.type})`;
+btn.onclick=()=>buyItem(category,item);
 }
 
-function dailyReward(){
-let now=Date.now();
-if(now-save.lastDaily>86400000){
-save.coins+=500;
-save.gems+=20;
-save.lastDaily=now;
-saveGame();
-updateHUD();
-}
-}
-
-function createClan(){
-let name=document.getElementById("clanName").value;
-if(name){
-save.clan={name:name,points:0};
-saveGame();
-renderClan();
-}
-}
-
-function renderClan(){
-if(save.clan){
-clanInfo.innerText="Clan: "+save.clan.name+" | Points: "+save.clan.points;
-}
-}
-
-function startTimer(){
-clearInterval(timerInterval);
-timer=60;
-timerInterval=setInterval(()=>{
-timer--;
-updateHUD();
-if(timer<=0){
-clearInterval(timerInterval);
-alert("Time Up!");
-newGame();
-}
-},1000);
-}
-
-function giveHint(){
-alert("Hint: حاول تجميع الألوان المتشابهة أولاً.");
-}
-
-function updateLeaderboard(){
-let lb=JSON.parse(localStorage.getItem("omegaLB"))||[];
-lb.push({score:save.wins,date:Date.now()});
-lb.sort((a,b)=>b.score-a.score);
-lb=lb.slice(0,10);
-localStorage.setItem("omegaLB",JSON.stringify(lb));
-leaderboard.innerHTML="";
-lb.forEach((p,i)=>{
-let div=document.createElement("div");
-div.innerText=(i+1)+". Wins: "+p.score;
-leaderboard.appendChild(div);
+div.innerHTML+=item.name+" ";
+div.appendChild(btn);
+container.appendChild(div);
 });
+}
+
+function buyItem(category,item){
+if(save[item.type]>=item.price){
+save[item.type]-=item.price;
+save.inventory[category][item.id]=true;
+
+if(category==="boosters"){
+save.boostersActive[item.id]+=5;
+}
+
+saveData();
+updateHUD();
+renderStore();
+alert("Purchased!");
+}else{
+alert("Not enough "+item.type);
+}
+}
+
+function equipItem(category,id){
+if(category==="skins") save.equipped.skin=id;
+if(category==="effects") save.equipped.effect=id;
+saveData();
+render();
+alert("Equipped!");
+}
+
+// ================= UI =================
+
+function updateHUD(){
+coins.innerText=save.coins;
+gems.innerText=save.gems;
+xp.innerText=save.xp;
+level.innerText=save.level;
+rank.innerText=save.rank;
 }
 
 function newGame(){
 generate();
 render();
-startTimer();
-updateLeaderboard();
+renderStore();
 updateHUD();
-renderClan();
-renderAchievements();
 }
 
 updateHUD();
 newGame();
+
 </script>
 </body>
 </html>
